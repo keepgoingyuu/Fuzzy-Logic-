@@ -19,14 +19,12 @@
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 2rem 2rem;
+  padding: 2rem 2rem 2rem 2.5rem;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.1);
   border-bottom: 2px solid rgba(59, 130, 246, 0.3);
 }
 
 .header-content {
-  max-width: 1400px;
-  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -131,9 +129,8 @@
   grid-template-columns: 380px 1fr;
   gap: 2rem;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  max-width: 100%;
+  padding: 0 1rem;
   box-sizing: border-box;
 }
 
@@ -273,13 +270,17 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
-  padding: 2.5rem;
+  padding: 2rem 2.5rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .section {
   margin-bottom: 3.5rem;
+}
+
+.section:first-child {
+  margin-top: 0;
 }
 
 .section h2 {
@@ -290,6 +291,7 @@
   font-size: 1.6rem;
   padding-bottom: 0.8rem;
   border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  margin-top: 0;
 }
 
 /* Charts Grid */
