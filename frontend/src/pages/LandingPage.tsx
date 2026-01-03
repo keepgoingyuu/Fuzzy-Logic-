@@ -18,8 +18,6 @@ interface Particle {
   vy: number;
   size: number;
   opacity: number;
-  baseX: number;
-  baseY: number;
 }
 
 export function LandingPage() {
@@ -33,10 +31,25 @@ export function LandingPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size with high DPI support
+    let logicalWidth = 0;
+    let logicalHeight = 0;
+
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      logicalWidth = window.innerWidth;
+      logicalHeight = window.innerHeight;
+
+      // Set actual canvas size (accounting for device pixel ratio)
+      canvas.width = logicalWidth * dpr;
+      canvas.height = logicalHeight * dpr;
+
+      // Set display size (CSS)
+      canvas.style.width = `${logicalWidth}px`;
+      canvas.style.height = `${logicalHeight}px`;
+
+      // Scale context to account for device pixel ratio
+      ctx.scale(dpr, dpr);
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -49,79 +62,81 @@ export function LandingPage() {
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Create particles
+    // Create particles using logical dimensions
     const particles: Particle[] = [];
-    const particleCount = 80;
+    const particleCount = 120;
 
     for (let i = 0; i < particleCount; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
+      const x = Math.random() * logicalWidth;
+      const y = Math.random() * logicalHeight;
       particles.push({
         x,
         y,
-        baseX: x,
-        baseY: y,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2 + 1,
-        opacity: Math.random() * 0.5 + 0.2
+        size: Math.random() * 3 + 2,
+        opacity: Math.random() * 0.6 + 0.4
       });
     }
 
     // Animation loop
     let animationId: number;
     const animate = () => {
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
       particles.forEach((particle, i) => {
-        // Update base position
-        particle.baseX += particle.vx;
-        particle.baseY += particle.vy;
+        // Update position
+        particle.x += particle.vx;
+        particle.y += particle.vy;
 
         // Bounce off edges
-        if (particle.baseX < 0 || particle.baseX > canvas.width) particle.vx *= -1;
-        if (particle.baseY < 0 || particle.baseY > canvas.height) particle.vy *= -1;
-
-        // Mouse interaction - particles move away from mouse
-        const dx = mouse.x - particle.baseX;
-        const dy = mouse.y - particle.baseY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const maxDistance = 150;
-
-        if (distance < maxDistance) {
-          const force = (maxDistance - distance) / maxDistance;
-          const angle = Math.atan2(dy, dx);
-          particle.x = particle.baseX - Math.cos(angle) * force * 50;
-          particle.y = particle.baseY - Math.sin(angle) * force * 50;
-        } else {
-          // Smoothly return to base position
-          particle.x += (particle.baseX - particle.x) * 0.05;
-          particle.y += (particle.baseY - particle.y) * 0.05;
-        }
+        if (particle.x < 0 || particle.x > logicalWidth) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > logicalHeight) particle.vy *= -1;
 
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(96, 165, 250, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(100, 116, 139, ${particle.opacity})`;
         ctx.fill();
 
-        // Draw connections
+        // Draw connections to other particles
         particles.slice(i + 1).forEach(otherParticle => {
           const dx = particle.x - otherParticle.x;
           const dy = particle.y - otherParticle.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 120) {
+          if (distance < 150) {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.15 * (1 - distance / 120)})`;
-            ctx.lineWidth = 0.5;
+            const opacity = 0.5 * (1 - distance / 150);
+            ctx.strokeStyle = `rgba(100, 116, 139, ${opacity})`;
+            ctx.lineWidth = 1.5;
             ctx.stroke();
           }
         });
+
+        // Draw connection to mouse
+        const dx = mouse.x - particle.x;
+        const dy = mouse.y - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 200) {
+          ctx.beginPath();
+          ctx.moveTo(particle.x, particle.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          const opacity = 0.6 * (1 - distance / 200);
+          ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
       });
+
+      // Draw mouse node
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
+      ctx.fill();
 
       animationId = requestAnimationFrame(animate);
     };

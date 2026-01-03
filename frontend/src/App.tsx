@@ -1,7 +1,7 @@
 /**
  * Main application component for Fuzzy Logic Demo
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InputControls } from './components/InputControls';
 import { MembershipChart } from './components/MembershipChart';
@@ -17,12 +17,22 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import SchoolIcon from '@mui/icons-material/School';
 import './App.css';
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  opacity: number;
+}
+
 function App() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vizData, setVizData] = useState<VisualizationData | null>(null);
   const [currentInputs, setCurrentInputs] = useState({ dirt: 120, grease: 140 });
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleInputChange = useCallback(async (dirt: number, grease: number) => {
     setCurrentInputs({ dirt, grease });
@@ -40,8 +50,148 @@ function App() {
     }
   }, []);
 
+  // Particle animation effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size to cover entire document with high DPI support
+    let logicalWidth = 0;
+    let logicalHeight = 0;
+
+    const resizeCanvas = () => {
+      const app = canvas.parentElement;
+      if (app) {
+        const dpr = window.devicePixelRatio || 1;
+        logicalWidth = app.scrollWidth;
+        logicalHeight = app.scrollHeight;
+
+        // Set actual canvas size (accounting for device pixel ratio)
+        canvas.width = logicalWidth * dpr;
+        canvas.height = logicalHeight * dpr;
+
+        // Set display size (CSS)
+        canvas.style.width = `${logicalWidth}px`;
+        canvas.style.height = `${logicalHeight}px`;
+
+        // Scale context to account for device pixel ratio
+        ctx.scale(dpr, dpr);
+      }
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Resize when content changes
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
+    }
+
+    // Mouse position (with scroll offset)
+    const mouse = { x: 0, y: 0 };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY + window.scrollY;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Create particles using logical dimensions
+    const particles: Particle[] = [];
+    const particleCount = 120;
+
+    for (let i = 0; i < particleCount; i++) {
+      const x = Math.random() * logicalWidth;
+      const y = Math.random() * logicalHeight;
+      particles.push({
+        x,
+        y,
+        baseX: x,
+        baseY: y,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 3 + 2,
+        opacity: Math.random() * 0.6 + 0.4
+      });
+    }
+
+    // Animation loop
+    let animationId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+
+      particles.forEach((particle, i) => {
+        // Update position
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        // Bounce off edges
+        if (particle.x < 0 || particle.x > logicalWidth) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > logicalHeight) particle.vy *= -1;
+
+        // Draw particle
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(100, 116, 139, ${particle.opacity})`;
+        ctx.fill();
+
+        // Draw connections to other particles
+        particles.slice(i + 1).forEach(otherParticle => {
+          const dx = particle.x - otherParticle.x;
+          const dy = particle.y - otherParticle.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 150) {
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(otherParticle.x, otherParticle.y);
+            const opacity = 0.5 * (1 - distance / 150);
+            ctx.strokeStyle = `rgba(100, 116, 139, ${opacity})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        });
+
+        // Draw connection to mouse
+        const dx = mouse.x - particle.x;
+        const dy = mouse.y - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 200) {
+          ctx.beginPath();
+          ctx.moveTo(particle.x, particle.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          const opacity = 0.6 * (1 - distance / 200);
+          ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
+      });
+
+      // Draw mouse node
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
+      ctx.fill();
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationId);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   return (
     <div className="App">
+      <canvas ref={canvasRef} className="particle-canvas" />
       <header className="app-header">
         <div className="header-content">
           <div className="header-main">
