@@ -1,0 +1,23 @@
+{
+  "name": "fuzzy-logic-demo",
+  "version": "1.0.0",
+  "description": "Interactive Fuzzy Logic Controller Educational Demo",
+  "scripts": {
+    "backend": "cd backend && uv sync && ./start.sh",
+    "frontend": "cd frontend && pnpm dev",
+    "dev": "concurrently \"pnpm backend\" \"pnpm frontend\"",
+    "test": "cd backend && uv run python test_fuzzy.py"
+  },
+  "keywords": [
+    "fuzzy-logic",
+    "education",
+    "visualization",
+    "react",
+    "fastapi"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
