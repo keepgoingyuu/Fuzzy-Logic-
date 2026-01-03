@@ -99,7 +99,8 @@ pnpm dev
 
 ```
 fuzzy-logic-demo/
-├── backend/                    # Python 後端
+├── .env                       # 環境變數配置 (API/Frontend Port)
+├── backend/                   # Python 後端
 │   ├── src/
 │   │   ├── fuzzy/             # 模糊邏輯引擎
 │   │   │   ├── membership.py  # 歸屬函數定義
@@ -107,42 +108,39 @@ fuzzy-logic-demo/
 │   │   └── api/
 │   │       └── main.py        # FastAPI 應用
 │   ├── pyproject.toml         # uv 配置文件
-│   ├── .env                   # 環境變數 (可修改 port)
 │   └── README.md
 │
-└── frontend/                   # React 前端
+└── frontend/                  # React 前端
     ├── src/
     │   ├── components/        # React 組件
     │   │   ├── InputControls.tsx
     │   │   ├── MembershipChart.tsx
     │   │   ├── RuleViewer.tsx
     │   │   └── OutputChart.tsx
+    │   ├── pages/             # 頁面組件
+    │   │   ├── LandingPage.tsx    # 首頁
+    │   │   └── LandingPage.css    # 首頁樣式
     │   ├── types.ts           # TypeScript 類型定義
     │   ├── api.ts             # API 客戶端
     │   ├── App.tsx            # 主應用組件
     │   └── App.css            # 樣式
     ├── package.json
-    ├── .env                   # 環境變數 (可修改 port)
     └── README.md
 ```
 
 ## ⚙️ 配置說明
 
-### 後端 Port 配置
+### 環境變數配置
 
-編輯 `backend/.env`:
+編輯專案根目錄的 `.env` 檔案：
 
 ```env
+# Backend API 配置
 API_HOST=0.0.0.0
 API_PORT=8000
 API_RELOAD=true
-```
 
-### 前端 Port 配置
-
-編輯 `frontend/.env`:
-
-```env
+# Frontend 配置
 VITE_APP_PORT=5173
 VITE_API_URL=http://localhost:8000
 VITE_API_PORT=8000
