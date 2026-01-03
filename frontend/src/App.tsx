@@ -2,6 +2,7 @@
  * Main application component for Fuzzy Logic Demo
  */
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { InputControls } from './components/InputControls';
 import { MembershipChart } from './components/MembershipChart';
 import { RuleViewer } from './components/RuleViewer';
@@ -17,6 +18,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import './App.css';
 
 function App() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vizData, setVizData] = useState<VisualizationData | null>(null);
@@ -43,7 +45,7 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="header-main">
-            <h1>
+            <h1 onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
               <PsychologyIcon sx={{ fontSize: 40, marginRight: 1, verticalAlign: 'middle' }} />
               模糊邏輯控制器教學系統
             </h1>
