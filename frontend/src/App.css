@@ -320,7 +320,7 @@
 }
 
 .section:first-child {
-  margin-top: 0;
+  margin-top: 0; /* 與左側輸入控制對齊 */
 }
 
 .section h2 {
@@ -328,8 +328,8 @@
   align-items: center;
   color: #f1f5f9;
   margin-bottom: 1.5rem;
-  font-size: 1.6rem;
-  padding-bottom: 0.8rem;
+  font-size: 1.5rem; /* 與左側輸入控制標題大小一致 */
+  padding-bottom: 0.8rem; /* 與左側輸入控制標題間距一致 */
   border-bottom: 2px solid rgba(100, 116, 139, 0.4);
   margin-top: 0;
 }
