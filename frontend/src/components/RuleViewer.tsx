@@ -1,14 +1,18 @@
 /**
  * Fuzzy rule activation viewer
  */
+import { useState } from 'react';
 import type { RuleActivation } from '../types';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 interface RuleViewerProps {
   rules: RuleActivation[];
 }
 
 export function RuleViewer({ rules }: RuleViewerProps) {
+  const [showInactive, setShowInactive] = useState(false);
   // 解析規則獲取輸入輸出
   const parseRule = (ruleText: string) => {
     const dirtMatch = ruleText.match(/dirt is (\w+)/);
@@ -47,76 +51,107 @@ export function RuleViewer({ rules }: RuleViewerProps) {
     return '強';
   };
 
+  // 分離觸發和未觸發的規則
+  const activeRules = rules.filter((rule, index) => ({...rule, index})).map((rule, i) => ({...rule, index: i})).filter(rule => rules[rule.index].firing_strength > 0);
+  const inactiveRules = rules.filter((rule, index) => ({...rule, index})).map((rule, i) => ({...rule, index: i})).filter(rule => rules[rule.index].firing_strength === 0);
+
+  const renderRuleCard = (ruleData: RuleActivation, index: number) => {
+    const parsed = parseRule(ruleData.rule);
+    const strengthColor = getStrengthColor(ruleData.firing_strength);
+    const strengthLabel = getStrengthLabel(ruleData.firing_strength);
+
+    return (
+      <div
+        key={index}
+        className={`rule-card ${ruleData.firing_strength > 0 ? 'active' : 'inactive'}`}
+        style={{ borderColor: strengthColor }}
+      >
+        <div className="rule-header">
+          <span className="rule-number">規則 {index + 1}</span>
+          <div className="rule-strength-badge">
+            <span
+              className="rule-badge"
+              style={{ backgroundColor: strengthColor }}
+            >
+              {strengthLabel}
+            </span>
+            <span className="strength-percentage">{(ruleData.firing_strength * 100).toFixed(0)}%</span>
+          </div>
+        </div>
+
+        <div className="rule-content">
+          <div className="rule-if-label">IF</div>
+          <div className="rule-condition">
+            <div className="condition-item">
+              <span className="condition-label">污泥</span>
+              <span className="condition-value">{parsed.dirt}</span>
+            </div>
+            <span className="condition-operator">且</span>
+            <div className="condition-item">
+              <span className="condition-label">油污</span>
+              <span className="condition-value">{parsed.grease}</span>
+            </div>
+          </div>
+
+          <div className="rule-then-label">THEN</div>
+
+          <div className="rule-result">
+            <span className="result-label">清洗</span>
+            <span className="result-value">{parsed.wash}</span>
+          </div>
+        </div>
+
+        <div className="rule-strength-display">
+          <div className="strength-bar-bg">
+            <div
+              className="strength-bar-fill"
+              style={{
+                width: `${ruleData.firing_strength * 100}%`,
+                backgroundColor: strengthColor
+              }}
+            />
+          </div>
+          <span className="strength-number">{ruleData.firing_strength.toFixed(3)}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="rule-viewer">
       <h2>
         <SettingsIcon sx={{ fontSize: 28, marginRight: 1, verticalAlign: 'middle' }} />
         規則觸發狀態
       </h2>
-      <p className="rule-count">共 {rules.length} 條規則</p>
 
-      <div className="rules-grid">
-        {rules.map((ruleData, index) => {
-          const parsed = parseRule(ruleData.rule);
-          const strengthColor = getStrengthColor(ruleData.firing_strength);
-          const strengthLabel = getStrengthLabel(ruleData.firing_strength);
+      {/* 已觸發規則區 */}
+      <div className="rule-section active-section">
+        <div className="section-header">
+          <h3>✅ 已觸發規則 ({activeRules.length}/{rules.length})</h3>
+        </div>
+        {activeRules.length > 0 ? (
+          <div className="rules-grid">
+            {activeRules.map((ruleWrapper) => renderRuleCard(rules[ruleWrapper.index], ruleWrapper.index))}
+          </div>
+        ) : (
+          <p className="no-rules-message">目前沒有觸發任何規則</p>
+        )}
+      </div>
 
-          return (
-            <div
-              key={index}
-              className={`rule-card ${ruleData.firing_strength > 0 ? 'active' : 'inactive'}`}
-              style={{ borderColor: strengthColor }}
-            >
-              <div className="rule-header">
-                <span className="rule-number">規則 {index + 1}</span>
-                <div className="rule-strength-badge">
-                  <span
-                    className="rule-badge"
-                    style={{ backgroundColor: strengthColor }}
-                  >
-                    {strengthLabel}
-                  </span>
-                  <span className="strength-percentage">{(ruleData.firing_strength * 100).toFixed(0)}%</span>
-                </div>
-              </div>
-
-              <div className="rule-content">
-                <div className="rule-if-label">IF</div>
-                <div className="rule-condition">
-                  <div className="condition-item">
-                    <span className="condition-label">污泥</span>
-                    <span className="condition-value">{parsed.dirt}</span>
-                  </div>
-                  <span className="condition-operator">且</span>
-                  <div className="condition-item">
-                    <span className="condition-label">油污</span>
-                    <span className="condition-value">{parsed.grease}</span>
-                  </div>
-                </div>
-
-                <div className="rule-then-label">THEN</div>
-
-                <div className="rule-result">
-                  <span className="result-label">清洗</span>
-                  <span className="result-value">{parsed.wash}</span>
-                </div>
-              </div>
-
-              <div className="rule-strength-display">
-                <div className="strength-bar-bg">
-                  <div
-                    className="strength-bar-fill"
-                    style={{
-                      width: `${ruleData.firing_strength * 100}%`,
-                      backgroundColor: strengthColor
-                    }}
-                  />
-                </div>
-                <span className="strength-number">{ruleData.firing_strength.toFixed(3)}</span>
-              </div>
-            </div>
-          );
-        })}
+      {/* 未觸發規則區 */}
+      <div className="rule-section inactive-section">
+        <div
+          className="section-header collapsible"
+          onClick={() => setShowInactive(!showInactive)}
+        >
+          <h3>⚪ 未觸發規則 ({inactiveRules.length})</h3>
+          {showInactive ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </div>
+        {showInactive && inactiveRules.length > 0 && (
+          <div className="rules-grid collapsed">
+            {inactiveRules.map((ruleWrapper) => renderRuleCard(rules[ruleWrapper.index], ruleWrapper.index))}
+          </div>
+        )}
       </div>
 
       <div className="legend">
