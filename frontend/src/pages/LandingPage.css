@@ -1,6 +1,7 @@
 /* Landing Page */
 .landing-page {
   min-height: 100vh;
+  min-height: 100dvh; /* 動態視窗高度，避免手機地址欄導致的高度跳動 */
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   position: relative;
   overflow: hidden;

@@ -21,6 +21,7 @@
 .App {
   position: relative;
   height: 100vh;
+  height: 100dvh; /* 動態視窗高度，避免手機地址欄導致的高度跳動 */
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
@@ -911,53 +912,76 @@
 }
 
 @media (max-width: 768px) {
+  /* 手機版：允許整頁滾動 */
+  .App {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
   .app-main {
     padding: 1rem 0.5rem;
+    overflow: visible;
+  }
+
+  .layout {
+    overflow: visible;
+    height: auto;
+  }
+
+  .sidebar {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .content {
+    padding: 1.25rem;
+    overflow-y: visible;
+    max-height: none;
   }
 
   .app-header {
-    padding: 1.5rem;
+    padding: 1rem;
+    position: relative;
   }
 
   .header-content {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.5rem;
+    gap: 0.75rem;
   }
 
   .app-header h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
   .app-header .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .header-badges {
     width: 100%;
     justify-content: space-between;
+    gap: 0.5rem;
   }
 
   .badge {
     flex: 1;
-    min-width: 90px;
-    padding: 0.6rem 0.8rem;
+    min-width: 80px;
+    padding: 0.4rem 0.5rem;
   }
 
   .badge-label {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+    margin-bottom: 0.15rem;
   }
 
   .badge-value {
-    font-size: 0.9rem;
-  }
-
-  .sidebar {
-    padding: 1.5rem;
-  }
-
-  .content {
-    padding: 1.5rem;
+    font-size: 0.75rem;
   }
 
   .charts-grid {
@@ -984,20 +1008,68 @@
   .section {
     margin-bottom: 2.5rem;
   }
+
+  /* 手機版輸入控制優化 */
+  .input-controls h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .control-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .value-display {
+    font-size: 1.1rem;
+  }
+
+  .preset-buttons {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .preset-buttons button {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
+  .app-header {
+    padding: 0.75rem;
+  }
+
   .app-header h1 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
+  }
+
+  .app-header .subtitle {
+    font-size: 0.7rem;
+  }
+
+  .header-content {
+    gap: 0.5rem;
   }
 
   .header-badges {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     width: 100%;
+    gap: 0.4rem;
   }
 
   .badge {
-    width: 100%;
+    flex: 1 1 calc(50% - 0.2rem);
+    min-width: 0;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .badge-label {
+    font-size: 0.5rem;
+  }
+
+  .badge-value {
+    font-size: 0.7rem;
   }
 
   .sidebar {
@@ -1008,9 +1080,25 @@
     padding: 1rem;
   }
 
+  .input-controls h2 {
+    font-size: 1.1rem;
+  }
+
+  .control-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .control-group label {
+    font-size: 0.9rem;
+  }
+
+  .value-display {
+    font-size: 1rem;
+  }
+
   .preset-buttons button {
-    padding: 0.8rem;
-    font-size: 0.95rem;
+    padding: 0.7rem;
+    font-size: 0.85rem;
   }
 
   .result-value {
@@ -1031,5 +1119,13 @@
     width: 2rem;
     height: 2rem;
     font-size: 0.9rem;
+  }
+
+  .app-footer {
+    padding: 1rem;
+  }
+
+  .footer-copyright {
+    font-size: 0.75rem;
   }
 }
