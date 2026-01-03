@@ -90,6 +90,23 @@ function App() {
       resizeObserver.observe(canvas.parentElement);
     }
 
+    // Also observe document body for content changes (especially on mobile)
+    const bodyObserver = new ResizeObserver(resizeCanvas);
+    bodyObserver.observe(document.body);
+
+    // Mutation observer for dynamic content changes
+    const mutationObserver = new MutationObserver(() => {
+      resizeCanvas();
+    });
+    if (canvas.parentElement) {
+      mutationObserver.observe(canvas.parentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+
     // Mouse position (with scroll offset)
     const mouse = { x: 0, y: 0 };
     const handleMouseMove = (e: MouseEvent) => {
@@ -186,6 +203,8 @@ function App() {
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationId);
       resizeObserver.disconnect();
+      bodyObserver.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 
