@@ -37,11 +37,17 @@ class TriangularMF(MembershipFunction):
 
     def membership(self, x: float) -> float:
         """Calculate membership degree using triangular function."""
-        if x <= self.a or x >= self.c:
+        if x < self.a or x > self.c:
             return 0.0
-        elif self.a < x <= self.b:
+        elif x == self.b:
+            return 1.0
+        elif self.a <= x < self.b:
+            if self.b == self.a:
+                return 1.0
             return (x - self.a) / (self.b - self.a)
-        else:  # self.b < x < self.c
+        else:  # self.b < x <= self.c
+            if self.c == self.b:
+                return 1.0
             return (self.c - x) / (self.c - self.b)
 
     def to_dict(self) -> Dict:
@@ -75,13 +81,17 @@ class TrapezoidalMF(MembershipFunction):
 
     def membership(self, x: float) -> float:
         """Calculate membership degree using trapezoidal function."""
-        if x <= self.a or x >= self.d:
+        if x < self.a or x > self.d:
             return 0.0
-        elif self.a < x <= self.b:
-            return (x - self.a) / (self.b - self.a)
-        elif self.b < x <= self.c:
+        elif self.b <= x <= self.c:
             return 1.0
-        else:  # self.c < x < self.d
+        elif self.a <= x < self.b:
+            if self.b == self.a:
+                return 1.0
+            return (x - self.a) / (self.b - self.a)
+        else:  # self.c < x <= self.d
+            if self.d == self.c:
+                return 1.0
             return (self.d - x) / (self.d - self.c)
 
     def to_dict(self) -> Dict:
